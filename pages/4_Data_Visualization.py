@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
+
 import numpy as np
 from services.load_data import generate_mockup_sales_data
 from utils.side_bar import add_sidebar_info
@@ -320,56 +320,4 @@ elif chart_type == "bar":
 # ... more chart types
 
 st.plotly_chart(fig, use_container_width=True)
-        """)
-
-    st.subheader("Real-time Data Simulation")
-    st.markdown("Simulate real-time data updates with auto-refresh.")
-
-    # Auto-refresh toggle
-    auto_refresh = st.checkbox("Enable Auto-refresh (every 2 seconds)")
-
-    if auto_refresh:
-        # Create a placeholder for the chart
-        chart_placeholder = st.empty()
-
-        # Simulate real-time data
-        if "counter" not in st.session_state:
-            st.session_state.counter = 0
-
-        # Generate random data
-        x_data = list(range(st.session_state.counter, st.session_state.counter + 10))
-        y_data = [np.random.randint(1, 100) for _ in range(10)]
-
-        real_time_df = pd.DataFrame({"Time": x_data, "Value": y_data})
-
-        # Update the chart
-        fig_realtime = px.line(
-            real_time_df,
-            x="Time",
-            y="Value",
-            title=f"Real-time Data (Update #{st.session_state.counter})",
-        )
-        chart_placeholder.plotly_chart(fig_realtime, use_container_width=True)
-
-        # Auto-refresh
-        st.session_state.counter += 1
-        st.rerun()
-
-    with st.expander("💡 Code Example"):
-        st.code("""
-# Real-time data simulation
-auto_refresh = st.checkbox("Enable Auto-refresh")
-
-if auto_refresh:
-    chart_placeholder = st.empty()
-    
-    # Generate new data
-    new_data = generate_random_data()
-    fig = px.line(new_data, x='time', y='value')
-    
-    # Update chart
-    chart_placeholder.plotly_chart(fig)
-    
-    # Trigger refresh
-    st.rerun()
         """)

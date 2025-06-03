@@ -262,16 +262,11 @@ if st.button("Calculate 🧮"):
 
 # Tips and Best Practices
 st.header("💡 Tips & Best Practices")
-
 st.markdown("""
 ### 🔄 Session State
 - Use `st.session_state` to persist data across reruns
 - Perfect for counters, user preferences, etc.
 
-
-### ⚡ Performance
-- Use `@st.cache_data` for expensive computations
-- Minimize widget interactions in loops
 """)
 
 # Session State Example

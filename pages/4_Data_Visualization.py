@@ -175,11 +175,42 @@ with tab3:
     st.header("Data Display Components")
     st.markdown("Various ways to display and interact with tabular data.")
 
+    # Add Month column
+    df["Month"] = pd.to_datetime(df["Order_Date"]).dt.strftime("%B")
+
+    # Add month filter
+    months = (
+        pd.Categorical(
+            df["Month"].unique(),
+            categories=[
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December",
+            ],
+            ordered=True,
+        )
+        .sort_values()
+        .tolist()
+    )
+    selected_months = st.multiselect("Filter by Month", months, default=months)
+
+    # Filter dataframe
+    filtered_df = df[df["Month"].isin(selected_months)]
+
     col1, col2 = st.columns(2)
 
     with col1:
         st.subheader("Simple Table")
-        st.table(df.head())
+        st.table(filtered_df.head())
 
         with st.expander("💡 Code Example"):
             st.code("""
@@ -189,7 +220,7 @@ st.table(df.head())
 
     with col2:
         st.subheader("Interactive DataFrame")
-        st.dataframe(df, use_container_width=True)
+        st.dataframe(filtered_df, use_container_width=True)
 
         with st.expander("💡 Code Example"):
             st.code("""
@@ -201,7 +232,7 @@ st.dataframe(df, use_container_width=True)
     st.markdown("Allow users to edit data directly in the interface:")
 
     # Create a smaller editable dataset
-    editable_df = df.head(5).copy()
+    editable_df = filtered_df.head(5).copy()
     edited_df = st.data_editor(
         editable_df,
         use_container_width=True,
@@ -228,24 +259,28 @@ edited_df = st.data_editor(
     with col1:
         st.metric(
             label="Total Sales",
-            value=f"${df['Sales'].sum():,.0f}",
+            value=f"${filtered_df['Sales'].sum():,.0f}",
             delta=f"{np.random.randint(-10, 10)}%",
         )
 
     with col2:
         st.metric(
             label="Avg Profit",
-            value=f"${df['Profit'].mean():,.0f}",
+            value=f"${filtered_df['Profit'].mean():,.0f}",
             delta=f"{np.random.randint(-5, 15)}%",
         )
 
     with col3:
         st.metric(
-            label="Total Products", value=len(df), delta=f"+{np.random.randint(1, 10)}"
+            label="Total Products",
+            value=len(filtered_df),
+            delta=f"+{np.random.randint(1, 10)}",
         )
 
     with col4:
-        st.metric(label="Categories", value=df["Category"].nunique(), delta=None)
+        st.metric(
+            label="Categories", value=filtered_df["Category"].nunique(), delta=None
+        )
 
     with st.expander("💡 Code Example"):
         st.code("""

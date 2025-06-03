@@ -150,7 +150,7 @@ with col2:
         # Progress bar
         st.progress(results["confidence"])
 
-
+st.divider()
 # Sample Data Loading Section - Using functions from services
 st.header("📊 Sample Data Loading")
 st.markdown("Demonstrating data loading using functions from the services module.")
@@ -168,7 +168,7 @@ if st.button("Load Sample Data"):
         except Exception as e:
             st.error(f"❌ Error loading data: {str(e)}")
 
-
+st.divider()
 # Model Management Section
 st.header("🧠 Model Management")
 
@@ -186,46 +186,18 @@ with col1:
 
     st.code(
         """
-@st.cache_resource
-def load_model():
-    # Load your actual model here
-    model = joblib.load('model.pkl')
-    return model
+        @st.cache_resource
+        def load_model():
+            # Load your actual model here
+            model = joblib.load('model.pkl')
+            return model
 
-model = load_model()
-prediction = model.predict(input_data)
+        model = load_model()
+        prediction = model.predict(input_data)
     """,
         language="python",
     )
 
-with col2:
-    st.subheader("📊 Model Performance")
-
-    # Mock performance metrics
-    metrics = {"Accuracy": 0.94, "Precision": 0.92, "Recall": 0.96, "F1-Score": 0.94}
-
-    for metric, value in metrics.items():
-        st.metric(metric, f"{value:.2%}")
-
-    # Performance chart
-    import plotly.graph_objects as go
-
-    fig = go.Figure(
-        data=go.Scatterpolar(
-            r=list(metrics.values()),
-            theta=list(metrics.keys()),
-            fill="toself",
-            name="Model Performance",
-        )
-    )
-
-    fig.update_layout(
-        polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
-        showlegend=False,
-        height=300,
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
 
 # Best Practices
 st.header("💡 Best Practices")

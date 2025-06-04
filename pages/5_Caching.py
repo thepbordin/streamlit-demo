@@ -88,7 +88,6 @@ with tab1:
             "ML models, database connections, non-serializable objects",
         ],
         "Serializable": ["Yes", "No"],
-        "Status": ["✅ Current", "✅ Current"],
     }
 
     st.table(pd.DataFrame(cache_info))
@@ -122,67 +121,30 @@ with tab2:
     """)
 
     # Example 1: Basic data caching
-    st.subheader("1. Basic Data Processing")
+    st.subheader("1. Basic Data Caching")
 
-    def expensive_data_processing_no_cache(size):
-        st.session_state.call_count += 1
-        time.sleep(1)  # Simulate expensive operation
-        data = np.random.rand(size, 3)
-        df = pd.DataFrame(data, columns=["A", "B", "C"])
-        df["Sum"] = df.sum(axis=1)
-        return df
+    st.markdown("""
+    Demonstrating cached data loading from our services module.
+    """)
 
-    @st.cache_data
-    def expensive_data_processing_cached(size):
-        st.session_state.cached_call_count += 1
-        time.sleep(1)  # Simulate expensive operation
-        data = np.random.rand(size, 3)
-        df = pd.DataFrame(data, columns=["A", "B", "C"])
-        df["Sum"] = df.sum(axis=1)
-        return df
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("**Without Caching:**")
-        if st.button("Run Expensive Function (No Cache)", key="no_cache"):
+    if st.button("Load Sample Data", key="load_sample_data"):
+        with st.spinner("Loading data from external source..."):
             start_time = time.time()
-            result = expensive_data_processing_no_cache(1000)
+            data = load_sample_data()
             end_time = time.time()
-            st.write(f"⏱️ Execution time: {end_time - start_time:.2f} seconds")
-            st.write(f"📞 Total function calls: {st.session_state.call_count}")
-            st.dataframe(result.head())
 
-    with col2:
-        st.markdown("**With Caching:**")
-        if st.button("Run Expensive Function (Cached)", key="cached"):
-            start_time = time.time()
-            result = expensive_data_processing_cached(1000)
-            end_time = time.time()
-            st.write(f"⏱️ Execution time: {end_time - start_time:.2f} seconds")
-            st.write(
-                f"📞 Total cached function calls: {st.session_state.cached_call_count}"
-            )
-            st.dataframe(result.head())
+            st.success(f"📊 Data loaded in {end_time - start_time:.2f} seconds")
+            st.write(f"📈 Dataset shape: {data.shape}")
+            st.dataframe(data.head())
 
-    with st.expander("💡 Code Example"):
-        st.code("""
-@st.cache_data
-def expensive_data_processing(size):
-    # This will only run once per unique 'size' value
-    time.sleep(1)  # Simulate expensive operation
-    data = np.random.rand(size, 3)
-    df = pd.DataFrame(data, columns=['A', 'B', 'C'])
-    df['Sum'] = df.sum(axis=1)
-    return df
-
-# First call with size=1000: takes ~1 second
-df = expensive_data_processing(1000)
-
-# Subsequent calls with size=1000: instant!
-df = expensive_data_processing(1000)
-        """)
-
+            # Show subsequent calls are instant
+            if st.button("Reload Same Data (Should be instant)", key="reload_data"):
+                start_time = time.time()
+                data_cached = load_sample_data()
+                end_time = time.time()
+                st.info(
+                    f"⚡ Cached data retrieved in {end_time - start_time:.3f} seconds"
+                )
     # Example 2: Data loading with parameters
     st.subheader("2. Parameterized Data Loading")
 
@@ -223,45 +185,14 @@ df = expensive_data_processing(1000)
         st.write(f"📊 Found {len(filtered_data)} records")
         st.dataframe(filtered_data)
 
-    # Show direct service usage
-    st.subheader("2.1. Direct Service Usage")
-
-    if st.button("Generate Mockup Data (Direct Service)", key="direct_service"):
-        start_time = time.time()
-        # This uses the cached function from services directly
-        mockup_data = generate_mockup_sales_data(num_records=100)
-        end_time = time.time()
-
-        st.write(f"⏱️ Generation time: {end_time - start_time:.3f} seconds")
-        st.write(f"📊 Generated {len(mockup_data)} records")
-        st.dataframe(mockup_data.head())
-
-    with st.expander("💡 Code Example"):
-        st.code("""
-# Using service functions with additional caching layers
-from services.load_data import generate_mockup_sales_data
-
-@st.cache_data
-def load_filtered_data(category_filter, min_sales):
-    # Cache key includes both parameters
-    time.sleep(0.5)  # Simulate database query
-    # Use the already cached service function
-    df = generate_mockup_sales_data()
-    return df[(df['Category'] == category_filter) & (df['Sales'] >= min_sales)]
-
-# Different parameter combinations create different cache entries
-data1 = load_filtered_data("Electronics", 100)  # Cached separately
-data2 = load_filtered_data("Electronics", 200)  # Different cache entry
-data3 = load_filtered_data("Electronics", 100)  # Uses cached result from data1
-
-# Direct service usage (already cached)
-mockup_data = generate_mockup_sales_data(num_records=500)  # Cached by service
-        """)
-
     # Example 3: Cache configuration options
     st.subheader("3. Cache Configuration")
 
-    @st.cache_data(ttl=30, max_entries=5, show_spinner="Loading data...")
+    @st.cache_data(
+        ttl=30,
+        max_entries=5,
+        show_spinner="Loading data...",
+    )
     def configurable_cache_example(data_type):
         time.sleep(1)
         if data_type == "random":
@@ -290,8 +221,6 @@ mockup_data = generate_mockup_sales_data(num_records=500)  # Cached by service
     ttl=300,                    # Cache expires after 5 minutes
     max_entries=10,             # Keep maximum 10 cache entries
     show_spinner="Loading...",  # Custom loading message
-    persist="disk",             # Persist cache to disk (experimental)
-    experimental_allow_widgets=True  # Allow widgets in cached functions
 )
 def my_cached_function(param):
     # Your expensive operation here
@@ -336,49 +265,6 @@ with tab3:
 
                 st.success(f"⚡ Model retrieved in {end_time - start_time:.3f} seconds")
                 st.json(model)
-
-    # Example using data loading
-    st.subheader("1.1. Data Loading Caching")
-
-    st.markdown("""
-    Demonstrating cached data loading from our services module.
-    """)
-
-    if st.button("Load Sample Data", key="load_sample_data"):
-        with st.spinner("Loading data from external source..."):
-            start_time = time.time()
-            data = load_sample_data()
-            end_time = time.time()
-
-            st.success(f"📊 Data loaded in {end_time - start_time:.2f} seconds")
-            st.write(f"📈 Dataset shape: {data.shape}")
-            st.dataframe(data.head())
-
-            # Show subsequent calls are instant
-            if st.button("Reload Same Data (Should be instant)", key="reload_data"):
-                start_time = time.time()
-                data_cached = load_sample_data()
-                end_time = time.time()
-                st.info(
-                    f"⚡ Cached data retrieved in {end_time - start_time:.3f} seconds"
-                )
-
-    with st.expander("💡 Code Example"):
-        st.code("""
-# Using the actual model loading service
-from services.load_model import load_mock_model
-
-# The @st.cache_resource decorator is already applied in the service
-model = load_mock_model()  # First call: takes ~1 second
-model = load_mock_model()  # Subsequent calls: instant!
-
-# Using the data loading service  
-from services.load_data import load_sample_data
-
-# The @st.cache_data decorator is already applied in the service
-data = load_sample_data()  # First call: takes ~5 seconds
-data = load_sample_data()  # Subsequent calls: instant!
-        """)
 
     # Example 2: Database Connection Caching
     st.subheader("2. Database Connection Simulation")

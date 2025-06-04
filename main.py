@@ -1,6 +1,9 @@
 import streamlit as st
 
+from utils.side_bar import add_sidebar_info
+
 st.set_page_config(page_title="Hello", page_icon="👋🏻", layout="wide")
+add_sidebar_info()
 
 st.markdown(
     """

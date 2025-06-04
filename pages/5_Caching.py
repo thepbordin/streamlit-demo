@@ -272,7 +272,11 @@ with tab3:
 
     from services.mock_db import MockDatabase
 
-    @st.cache_resource
+    def is_db_connect(db: MockDatabase):
+        """Check if the database connection is valid"""
+        return db is not None and db.connection_time is not None
+
+    @st.cache_resource(validate=is_db_connect)
     def get_database_connection(db_url):
         """Create and cache database connection"""
         return MockDatabase(db_url)
@@ -281,18 +285,32 @@ with tab3:
         "Database URL", value="postgresql://localhost:5432/mydb", key="db_url"
     )
 
+    db = get_database_connection(db_url)
     if st.button("Connect to Database"):
-        start_time = time.time()
-        db = get_database_connection(db_url)
-        end_time = time.time()
+        try:
+            start_time = time.time()
+            db.connect()
+            end_time = time.time()
+            st.success(f"✅ Connected in {end_time - start_time:.5f} seconds")
+            st.write(f"🔗 {db}")
+            st.write(f"⏰ Connection established at: {db.connection_time}")
+        except Exception as e:
+            st.error(f"❌ Connection failed: {str(e)}")
 
-        st.success(f"✅ Connected in {end_time - start_time:.2f} seconds")
-        st.write(f"🔗 {db}")
-        st.write(f"⏰ Connection established at: {db.connection_time}")
-
+    col1, col2 = st.columns(2)
+    with col1:
         if st.button("Run Query"):
-            result = db.query("SELECT * FROM sample_table LIMIT 10")
-            st.dataframe(result)
+            try:
+                result = db.query("SELECT * FROM sample_table LIMIT 10")
+                st.dataframe(result)
+            except ValueError as e:
+                st.error(f"❌ Query failed: {str(e)}")
+
+    with col2:
+        if st.button("Disconnect Database"):
+            db.close()
+            st.warning("🔌 Database disconnected!")
+            st.write(f"🔗 {db}")
 
     with st.expander("💡 Code Example"):
         st.code("""
@@ -322,14 +340,12 @@ result = db.execute("SELECT * FROM users")
 
     with col2:
         if st.button("Clear Data Cache"):
-            # Clear specific service caches
             load_sample_data.clear()
             st.cache_data.clear()
             st.success("✅ Data cache cleared!")
 
     with col3:
-        if st.button("Clear Model Cache"):
-            # Clear specific service caches
+        if st.button("Clear Resource Cache"):
             load_mock_model.clear()
             st.cache_resource.clear()
             st.success("✅ Model cache cleared!")

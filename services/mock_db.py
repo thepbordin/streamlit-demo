@@ -13,6 +13,9 @@ class MockDatabase:
         self.connect()
 
     def connect(self):
+        if self.connected:
+            raise ValueError("Database already connected!")
+        time.sleep(0.7)
         self.connected = True
         self.connection_time = datetime.now()
 

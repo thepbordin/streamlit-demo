@@ -616,18 +616,6 @@ with st.expander("⚡ Performance Optimization Tips"):
     def analyze_sales_data(preprocessed_data_hash, analysis_params):
         return expensive_analysis(preprocessed_data_hash, analysis_params)
     ```
-    
-    ### 5. **Error Handling**
-    ```python
-    @st.cache_data
-    def robust_data_loading(data_source):
-        try:
-            return load_data(data_source)
-        except Exception as e:
-            # Don't cache errors for retry capability
-            st.error(f"Failed to load data: {e}")
-            raise
-    ```
     """)
 
 st.success(

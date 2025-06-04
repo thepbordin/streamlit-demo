@@ -23,12 +23,11 @@ interactive plots, and data display components.
 df = generate_mockup_sales_data()
 
 # Tabs for different visualization types
-tab1, tab2, tab3, tab4 = st.tabs(
+tab1, tab2, tab3 = st.tabs(
     [
         "📈 Basic Charts",
         "🎨 Advanced Plots",
         "📋 Data Display",
-        "🔄 Interactive Visualizations",
     ]
 )
 
@@ -291,10 +290,9 @@ st.metric(
 )
         """)
 
-with tab4:
     st.header("Interactive Visualizations")
     st.markdown("Create dynamic charts that respond to user input.")
-
+    st.write(df.columns)
     # Interactive chart controls
     st.subheader("Customizable Chart")
 

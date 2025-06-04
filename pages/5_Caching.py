@@ -266,6 +266,7 @@ with tab3:
                 st.success(f"⚡ Model retrieved in {end_time - start_time:.3f} seconds")
                 st.json(model)
 
+    st.divider()
     # Example 2: Database Connection Caching
     st.subheader("2. Database Connection Simulation")
 
@@ -336,6 +337,8 @@ db = get_database_connection("postgresql://localhost/mydb")
 result = db.execute("SELECT * FROM users")
         """)
 
+    st.divider()
+
     # Example 3: Cache Management
     st.subheader("3. Cache Management")
 
@@ -382,6 +385,7 @@ def get_user_data(user_id, _force_refresh=False):
     return load_user_data(user_id)
         """)
 
+st.divider()
 # Best Practices section
 st.header("📋 Caching Best Practices")
 
